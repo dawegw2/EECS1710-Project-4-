@@ -20,19 +20,16 @@ class Star {
       star1 = false;
     }
     starSize = 5;
-
     x = random(-1000, 0);
-
-    mult = random(0.01, 0.05);
-
     y = random(10, 300);
     position = new PVector(x, y);
+    mult = random(0.01, 0.05);
     imageMode(CENTER);
   }
 
   void draw() {
     noStroke();
-    fill(255, random(100, 150)); 
+    fill(255, random(100, 150) + outAmp); 
     tint(255, random(50, 150));
     rotSpeed = map(bpm, 20, 500, 0.05, 15);
     rot = rot + rotSpeed;
@@ -52,7 +49,7 @@ class Star {
 
   //moves stars
   void update() {
-    xSpeed = map(bpm, 60, 500, 1, 20);
+    xSpeed = map(bpm, 60, 500, 3, 30);
     position.x += xSpeed;
   }
 

@@ -12,8 +12,6 @@ MidiBus bus;
 
 Minim minim;
 AudioOutput out, out2, out3;
-myInstrument2 myIns;
-
 LowPassFS lpf, lpf2, lpf3, lpf4;
 
 Obj sun;
@@ -21,7 +19,7 @@ Obj sun;
 IntDict notes;
 int insNumber = 1;
 float insAmp = 0.1;
-boolean toggleInstument;
+boolean instrumentToMidi;
 
 ArrayList<Star> stars;
 int numStars = 35;
@@ -33,8 +31,10 @@ Sampler hat;
 Sampler ophat;
 
 boolean lpfOn = false;
-boolean volMouseOn = false;
+boolean gainMouseOn = false;
+boolean mouseActive = false;
 boolean playToggle = false;
+boolean switchKit = false;
 
 boolean[] ophatRow = new boolean[16];
 boolean[] hatRow = new boolean[16];
@@ -54,11 +54,10 @@ float div = 1;
 
 float yoff = 0.0;  
 
-int t; 
 float starxPos;
 float modulateFrequency;
 
-float c;
+float outAmp;
 
 void setup() {
   size(1200, 800, P3D);
@@ -84,7 +83,7 @@ void setup() {
   hat   = new Sampler("Lofi Hi Hat 014.wav", 4, minim);
   ophat = new Sampler("Lofi Open Hi Hat 004.wav", 4, minim);
 
-  // patch samplers to the output
+  //patch samplers to the output
   kick.patch(lpf).patch(out2);
   snare.patch(lpf2).patch(out2);
   hat.patch(lpf3).patch(out2);
@@ -102,7 +101,7 @@ void setup() {
   }
 
   dmBeat = 0;
-  // start the sequencer
+  //start the drum sequencer
   out2.playNote(0, 0.25f, new Tick());
 
   //CP5 controls
@@ -118,13 +117,12 @@ void setup() {
 }
 
 void draw() {
-  //print(t);
-  background(110, 117, 130); //255, 201, 150 //159, 95, 128 //205, 24, 24 red //rgb(255, 132, 116)pink
+  background(110, 117, 130);
 
   stroke(255);
   loadPixels();
-  float div = map(gainVal, -40, 0, 5, 1); //map(insAmp, 0, 1, 5, 1); 
-  c = map(currentAmplitude(), 0, 1, 0, 255);
+  float div = map(gainVal, -40, 0, 5, 1); 
+  outAmp = map(getTheAmplitude(), 0, 1, 0, 255);
 
   //pixel array to add the gradient background
   for (int x = 0; x < width; x+= scaler) {
@@ -132,7 +130,7 @@ void draw() {
       int index = x + y * width;
 
       //float d = dist (x, y, mouseX, mouseY);
-      pixels[index] = color (y/div, 132, 116 + c); //222, 131, y/2  //y/div, 131, 222(blue)
+      pixels[index] = color (y/div, 132, 116 + outAmp);
     }
   }
   updatePixels();
@@ -165,8 +163,7 @@ void draw() {
 
   //sun
   float r2 = out2.right.get(1);
-  sun.display(r2*100);
-  sun.sunLight();
+  sun.run(r2*100);
 
   //drumMachine controls
   drumBpm(bpm);
@@ -175,7 +172,7 @@ void draw() {
 
   //https://processing.org/examples/noisewave.html
   beginShape(); 
-  fill(112 + c/4, 80, 128 + c/4);
+  fill(112 + outAmp/4, 80, 128 + outAmp/4);
   noStroke();
   float xoff = 0; // Option #1: 2D Noise
 
@@ -199,16 +196,13 @@ void draw() {
   for (int i = 0; i < out.bufferSize() - 1; i++) {
     stroke(255);
     float r = out.right.get(i + 1); //returns value from -1 and 1
-    //line( i, 50 + out.left.get(i)*50, i+1, 50 + out.left.get(i+1)*50 );
-    //line( i, 150 + out.right.get(i)*50, i+1, 150 + out.right.get(i+1)*50 );
-
     //rectangle waveforms
     noStroke();
-    fill(112 + c/4, 80, 128 + c/4);
+    fill(112 + outAmp/4, 80, 128 + outAmp/4);
     rect(i*10, height - 250, 10, 50 + r*200);
-    fill(100 + c/4, 70, 121 + c/4);
+    fill(100 + outAmp/4, 70, 121 + outAmp/4);
     rect(i*10, height - 230, 10, 50 + r*100);
-    fill(88 + c/4, 61, 114 + c/4);
+    fill(88 + outAmp/4, 61, 114 + outAmp/4);
     rect(i*10, height - 200, 10, 50 + r*100);
   }
 
@@ -223,7 +217,7 @@ void draw() {
     buttons.get(i).draw();
   }
 
-  stroke(128);
+  stroke(127);
   if ( dmBeat % 4 == 0 ) {
     fill(200, 0, 0);
   } else {
@@ -239,8 +233,6 @@ void draw() {
   text("HH", 20, height - 80);
   text("S", 20, height - 50);
   text("K", 20, height - 20);
-
-  text("Waveform Controls", 700, 630);
 
   text("1", 50, height - 135);
   text("2", 170, height - 135);
@@ -260,17 +252,28 @@ void draw() {
   } else if (insNumber == 5) {
     wvform = "Random Harmonic";
   }
-
-  text(wvform + " Wave", 825, 660);
-
+  
+  text(wvform + " Wave", 825, 625);
+  text("Drum Machine", 300, 625);
+  
+  if (!instrumentToMidi) { 
+    //stroke(255);
+    fill(255);
+  } else {
+    //stroke(0, 255, 0);
+    fill(0, 255, 0);
+  }
+  //ellipse(625, 720, 10, 10);
+  text("MIDI", 630, 730);
+  
+  //mouseclick note output. Pitches are mapped to the mousex position
   float p = int(map(mouseX, 0, width, 60, 72));
   //insAmp = map(mouseY, 0, height, 0, 1);
-  if (mousePressed && mouseY < 450) {
-    modulateFrequency = map( mouseX, 0, width, 440, 880 );
-    println(p);
-    out3.playNote(0, noteLength, new myInstrument(Frequency.ofMidiNote(p).asHz(), 0.1));
+  if (mousePressed && mouseY < 450 && mouseActive) {
+    //println(p);
+    out.playNote(0, noteLength, new myInstrument(Frequency.ofMidiNote(p).asHz()));
   } 
-  surface.setTitle("" + frameRate);
+  //surface.setTitle("" + frameRate);
 }
 
 //MIDI Control
@@ -279,19 +282,18 @@ void noteOn(int channel, int pitch, int velocity) {
   //out.playNote(0, 1, new SineInstrument(pitch));
 
   //if instument isn't toggled on, midi notes are played using Microsoft GS Wavetable Synth
-  if (!toggleInstument) {
+  if (!instrumentToMidi) {
     bus.sendNoteOn(channel, pitch, velocity); // Send a Midi noteOn
-    lines.add(new ShootingStar(velocity + 10, pitch));
+    lines.add(new ShootingStar(pitch));
   }
 
-  float vol = map(velocity, 0, 100, 0, 1); 
   String[] keys = notes.keyArray();
-  if (toggleInstument) {
+  if (instrumentToMidi) {
     for (String k : keys) {
       int notePitch = notes.get(k);
       if (notePitch == pitch) {
-        out.playNote(0, noteLength, new myInstrument(Frequency.ofPitch(k).asHz(), vol));
-        lines.add(new ShootingStar(velocity + 10, pitch));
+        out.playNote(0, noteLength, new myInstrument(Frequency.ofPitch(k).asHz()));
+        lines.add(new ShootingStar(pitch));
       }
     }
     println("Note on: " + channel + ", " + pitch + ", " + velocity);
@@ -302,4 +304,14 @@ void noteOff(int channel, int pitch, int velocity) {
   bus.sendNoteOff(channel, pitch, velocity); // Send a Midi nodeOff
   //nm.releaseNote(new Note(channel, pitch, velocity));
   println("Note off: " + channel + ", " + pitch + ", " + velocity);
+}
+
+//returns the Amplitude of the AudioOutput out 
+float getTheAmplitude() {
+  float leftOutput = 0;
+  for (int i = 0; i < out.bufferSize() - 1; i++) {
+    leftOutput += abs(out.left.get(i));
+  }
+  leftOutput /= float(out.bufferSize());
+  return leftOutput;
 }

@@ -19,7 +19,7 @@ class Tick implements Instrument {
     //println(dmBeat);
     // set the new tempo
     // out.setTempo( bpm );
-    // play this again right now, with a sixteenth note duration
+    //play note with a sixteenth note duration
     out2.playNote( 0, 0.25f, this );
   }
 }
@@ -40,17 +40,13 @@ class Rect {
   }
 
   public void draw() {
-
     stroke(255);
     if ( steps[stepId] ) {
-
       fill(0, 200, 255, 150);
     } else {
-      fill(0, 0, 200, 150);
+      fill(0, 0, 100, 150);
     }
-
     rect(x, y, w, h, 10);
-
     if ( mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h ) {
       fill(255, 0, 255);
     }

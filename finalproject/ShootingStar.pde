@@ -2,6 +2,7 @@ class ShootingStar {
   PVector position, position2, target;
   float size;
   int birthtime = 0;
+  float a = 55;
   int lifetime = 3000;
   boolean alive = true;
   float delta;
@@ -15,12 +16,11 @@ class ShootingStar {
   float lerpSpeed2;
   float ran;
 
-  ShootingStar(int _size, int pitch_) {
+  ShootingStar(float pitch_) {
     targetY = random(300, 500);
     float ranVal = random(0, width/2);
     float ranVal2 = random(-10, 0);
     x = ranVal;//map(pitch_, 36, 96, 0, width/2);
-    //x = _x;
     y = ranVal2;
     x2 = ranVal;
     y2 = ranVal2;
@@ -28,29 +28,32 @@ class ShootingStar {
     position2 = new PVector(x2, y2);
     target = new PVector(1400, targetY);
     ran = random(1, 2);
-    lerpSpeed = random(0.05, 0.1);
-    lerpSpeed2 = random(0.1, 0.2);
-    size = _size;
-    delta = size / 100.0;    
+    lerpSpeed = random(0.06, 0.1);
+    lerpSpeed2 = random(0.008, 0.1);
+    size = 3; 
+
     birthtime = millis();
   }
 
   void update() {
-    position.lerp(target, 0.1);
+    position.lerp(target, lerpSpeed + lerpSpeed2);
     position2.lerp(target, lerpSpeed);
     if (alive) {
       position.y += delta;
       if (millis() > birthtime + lifetime) alive = false;
     }
+    if (a > 150) {
+      a = 55;
+    }
   }
 
   void draw() {   
-    float n = sin(frameCount*0.01)*500;
-    ellipse(position.x, position.y, 5, 5);
     strokeWeight(2);
     strokeCap(ROUND);
-    stroke(255, 255, 255, 55);
+    stroke(255, 255, 255, 20 + outAmp);
     line(position.x, position.y, position2.x, position2.y);
+    ellipse(position.x, position.y, size, size);
+    a += 1;
   }
 
   void run() {
