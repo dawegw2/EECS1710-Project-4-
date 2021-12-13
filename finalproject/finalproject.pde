@@ -51,12 +51,10 @@ int numofHarmonics = 2;
 
 int scaler = 2; //scaler for pixel array
 float div = 1;
-
 float yoff = 0.0;  
 
 float starxPos;
 float modulateFrequency;
-
 float outAmp;
 
 void setup() {
@@ -88,10 +86,6 @@ void setup() {
   snare.patch(lpf2).patch(out2);
   hat.patch(lpf3).patch(out2);
   ophat.patch(lpf4).patch(out2);
-  //kick.patch(out2);
-  //snare.patch(out2);
-  // hat.patch(out2);
-  // ophat.patch(out2);
 
   for (int i = 0; i < 16; i++) {
     buttons.add(new Rect(50+i*30, height - 115, ophatRow, i));
@@ -227,45 +221,8 @@ void draw() {
   //beat marker    
   rect(50+dmBeat*30, height - 150, 20, 1);
 
-  fill(255);
-  textSize(15);
-  text("OP", 20, height - 110);
-  text("HH", 20, height - 80);
-  text("S", 20, height - 50);
-  text("K", 20, height - 20);
+  textLabels(); 
 
-  text("1", 50, height - 135);
-  text("2", 170, height - 135);
-  text("3", 290, height - 135);
-  text("4", 410, height - 135);
-
-  String wvform = "Sine";
-
-  if (insNumber == 1) {
-    wvform = "Sine";
-  } else if (insNumber == 2) {
-    wvform = "Triangle";
-  } else if (insNumber == 3) {
-    wvform = "Saw";
-  } else if (insNumber == 4) {
-    wvform = "Square";
-  } else if (insNumber == 5) {
-    wvform = "Random Harmonic";
-  }
-  
-  text(wvform + " Wave", 825, 625);
-  text("Drum Machine", 300, 625);
-  
-  if (!instrumentToMidi) { 
-    //stroke(255);
-    fill(255);
-  } else {
-    //stroke(0, 255, 0);
-    fill(0, 255, 0);
-  }
-  //ellipse(625, 720, 10, 10);
-  text("MIDI", 630, 730);
-  
   //mouseclick note output. Pitches are mapped to the mousex position
   float p = int(map(mouseX, 0, width, 60, 72));
   //insAmp = map(mouseY, 0, height, 0, 1);
@@ -278,9 +235,6 @@ void draw() {
 
 //MIDI Control
 void noteOn(int channel, int pitch, int velocity) {
-  //nm.addNote(new Note(channel, pitch, velocity));
-  //out.playNote(0, 1, new SineInstrument(pitch));
-
   //if instument isn't toggled on, midi notes are played using Microsoft GS Wavetable Synth
   if (!instrumentToMidi) {
     bus.sendNoteOn(channel, pitch, velocity); // Send a Midi noteOn
