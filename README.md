@@ -25,6 +25,7 @@ Visuals:
 - Amplitude or Volume of the waveforms adjust the blue rgb setting of the colors (adds a blue tint when a note is played)
 - Wave form frequencies map to sun color change 
 - Gain knob is mapped to the height of the sun and color of the sky
+- Shooting Stars fall from the sky every time a note is played
 
 Extra Controls and Shortcuts:
 - SPACEBAR to toggle drum machine play/pause button 
@@ -33,7 +34,7 @@ Extra Controls and Shortcuts:
 - Scroll wheel can adjust slider and knob settings
 
 Libraries Used:
-- Minim Library (For audio, such as triggering drum machine sounds and creating the waveforms )
+- Minim Library (For audio functions, such as triggering drum sounds notes, as well as the drum machine itsef and how to create and patch instruments)
 - ControlP5 Library (For the GUI and controling audio functions, such as volume gain and harmonics) 
 - The Midibus Library (For Midi keyboard support) 
 
