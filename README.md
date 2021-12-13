@@ -14,7 +14,7 @@ Drum Machine:
 - 4 different sounds including a open hi hat, hi hat, snare and kick
 - Counts in 16th notes
 - The BPM is adjustable (ranging from 20 - 500 BPM)
-- Play/Pause buttons
+- Play/Pause button
 - The drum machine has low pass filter mapped to the mouse x position
 
 Visuals:
@@ -39,7 +39,7 @@ Libraries Used:
 
 Other Resources:
 - Drum Sounds: https://arcadeerabeats.com/sound-kits/ultimate-lofi-drum-kit-43638
-- Rotate and Scale: https://www.youtube.com/watch?v=AUddj9kzyyY&list=LL&index=3&ab_channel=thedotisblackcreativecoding
 - Polygon: https://processing.org/examples/regularpolygon.html
+- Rotate and Scale of Polygon: https://www.youtube.com/watch?v=AUddj9kzyyY&list=LL&index=3&ab_channel=thedotisblackcreativecoding
 - Noise Wave: https://processing.org/examples/noisewave.html
 - And Minim, Midibus and ControlP5 library examples
